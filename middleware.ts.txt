@@ -1,0 +1,28 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+export function middleware(request: NextRequest) {
+  const basicAuth = request.headers.get('authorization');
+
+  const username = process.env.ADMIN_USERNAME;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (basicAuth) {
+    const authValue = basicAuth.split(' ')[1];
+    const [user, pwd] = atob(authValue).split(':');
+
+    if (user === username && pwd === password) {
+      return NextResponse.next();
+    }
+  }
+
+  return new NextResponse('Adminbereich geschützt', {
+    status: 401,
+    headers: {
+      'WWW-Authenticate': 'Basic realm="Admin"',
+    },
+  });
+}
+
+export const config = {
+  matcher: ['/admin/:path*'],
+};
