@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
-export default function ReservierungPage() {
+export default function ReservationPage() {
   const router = useRouter();
 
   const [form, setForm] = useState({
@@ -17,13 +17,8 @@ export default function ReservierungPage() {
     message: '',
   });
 
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-
-  async function handleSubmit(e: FormEvent) {
+  async function submitReservation(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setErrorMessage('');
 
     const { error } = await supabase.from('reservations').insert({
       name: form.name,
@@ -37,110 +32,80 @@ export default function ReservierungPage() {
     });
 
     if (error) {
-      setErrorMessage('Reservierung konnte nicht gesendet werden. Bitte später erneut versuchen.');
-      setLoading(false);
+      alert('Fehler beim Senden der Reservierung.');
       return;
     }
 
-    await fetch('/api/send-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type: 'reservation',
-        ...form,
-      }),
-    });
+await fetch('/api/send-email', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    type: 'reservation',
+    ...form,
+  }),
+});
 
-    setLoading(false);
     router.push('/danke');
   }
 
   return (
-    <main className="container">
-      <section className="card">
-        <h1>Tisch reservieren</h1>
+    <main style={{ maxWidth: 600, margin: '40px auto', padding: 20 }}>
+      <h1>Tisch reservieren</h1>
 
-        {errorMessage && <div className="error">{errorMessage}</div>}
+      <form onSubmit={submitReservation}>
+        <input
+          required
+          placeholder="Name"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
 
-        <form onSubmit={handleSubmit} className="form">
-          <label>
-            Name *
-            <input
-              required
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-          </label>
+        <input
+          placeholder="Telefon"
+          value={form.phone}
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+        />
 
-          <div className="grid">
-            <label>
-              Telefon
-              <input
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              />
-            </label>
+        <input
+          type="email"
+          placeholder="E-Mail"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
 
-            <label>
-              E-Mail
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-            </label>
-          </div>
+        <input
+          required
+          type="date"
+          value={form.date}
+          onChange={(e) => setForm({ ...form, date: e.target.value })}
+        />
 
-          <div className="grid">
-            <label>
-              Datum *
-              <input
-                required
-                type="date"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-              />
-            </label>
+        <input
+          required
+          type="time"
+          value={form.time}
+          onChange={(e) => setForm({ ...form, time: e.target.value })}
+        />
 
-            <label>
-              Uhrzeit *
-              <input
-                required
-                type="time"
-                value={form.time}
-                onChange={(e) => setForm({ ...form, time: e.target.value })}
-              />
-            </label>
-          </div>
+        <input
+          required
+          type="number"
+          min="1"
+          placeholder="Personen"
+          value={form.guests}
+          onChange={(e) => setForm({ ...form, guests: Number(e.target.value) })}
+        />
 
-          <label>
-            Personen *
-            <input
-              required
-              type="number"
-              min="1"
-              value={form.guests}
-              onChange={(e) =>
-                setForm({ ...form, guests: Number(e.target.value) })
-              }
-            />
-          </label>
+        <textarea
+          placeholder="Bemerkung"
+          value={form.message}
+          onChange={(e) => setForm({ ...form, message: e.target.value })}
+        />
 
-          <label>
-            Bemerkung
-            <textarea
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-            />
-          </label>
-
-          <button type="submit" disabled={loading}>
-            {loading ? 'Wird gesendet...' : 'Reservierung anfragen'}
-          </button>
-        </form>
-      </section>
+        <button type="submit">Reservierung anfragen</button>
+      </form>
     </main>
   );
 }
