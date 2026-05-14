@@ -1,0 +1,10 @@
+{
+  "name": "Tischreservierung",
+  "short_name": "Reservierung",
+  "description": "Tischreservierungen und Anfragen",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#7a3e22",
+  "icons": []
+}
