@@ -15,16 +15,6 @@ const { error } = await supabase.from('reservations').insert({
   status: 'open',
 });
 
-await fetch('/api/send-email', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    type: 'reservation',
-    ...form,
-  }),
-});
 
 router.push('/danke');
 
