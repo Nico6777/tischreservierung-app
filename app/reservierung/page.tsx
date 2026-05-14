@@ -4,6 +4,30 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
+const { error } = await supabase.from('reservations').insert({
+  name: form.name,
+  phone: form.phone,
+  email: form.email,
+  date: form.date,
+  time: form.time,
+  guests: form.guests,
+  message: form.message,
+  status: 'open',
+});
+
+await fetch('/api/send-email', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    type: 'reservation',
+    ...form,
+  }),
+});
+
+router.push('/danke');
+
 export default function ReservationPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
